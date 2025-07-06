@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Merve & Kadir - Fotoğraf Yükleme</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f7f7f7;
+      padding: 50px;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+      max-width: 600px;
+    }
+
+    img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    input[type="file"] {
+      margin-top: 20px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #6a5acd;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #counterBox {
+      margin: 30px auto;
+      width: 100px;
+      height: 100px;
+      background-color: #6a5acd;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: bold;
+      border-radius: 12px;
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Merve & Kadir - Fotoğraf Yükleme</h2>
+    <img src="https://media.istockphoto.com/id/610259354/tr/foto%C4%9Fraf/young-woman-using-dslr-camera.jpg?s=612x612&w=0&k=20&c=jToy1YfCn0mB6ZKu3TCzWWhmcpU8xo38KfLdTEeoack=" alt="Davet Görseli">
+    <p>Bu özel günden kalan kareleri bizimle paylaşın 📸</p>
+
+    <input type="file" id="fileInput" accept="image/*" multiple><br>
+    <button onclick="uploadPhotos()">Fotoğrafları Yükle</button>
+
+    <div id="counterBox">0</div>
+  </div>
+
+  <script>
+    async function uploadPhotos() {
+      const fileInput = document.getElementById('fileInput');
+      const files = fileInput.files;
+
+      if (files.length === 0) {
+        alert('Lütfen en az bir fotoğraf seçin.');
+        return;
+      }
+
+      if (files.length > 70) {
+        alert('Maksimum 70 fotoğraf yükleyebilirsiniz.');
+        return;
+      }
+
+      const counterBox = document.getElementById('counterBox');
+      counterBox.style.visibility = "visible";
+
+      let remaining = files.length;
+      counterBox.innerText = remaining;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+
+        await new Promise((resolve) => {
+          reader.onload = async function(event) {
+            const base64Data = event.target.result.split(',')[1];
+            await fetch("https://script.google.com/macros/s/AKfycbxmHvDkhAQ4zCOC84ztP5kkoEwh1r1d8YZstXsp7Rfu0ILYpIntHpvLt5x4yFfSj7xN/exec", {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({
+                "photo": base64Data,
+                "name": file.name,
+                "mimeType": file.type
+              })
+            });
+
+            remaining--;
+            counterBox.innerText = remaining;
+            resolve();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      counterBox.innerText = "✔";
+      setTimeout(() => {
+        counterBox.style.visibility = "hidden";
+      }, 3000);
+    }
+  </script>
+
+</body>
+</html>
